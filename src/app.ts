@@ -1,6 +1,8 @@
-import express, { Request, Response } from "express";
-import { DNAChecker } from "./modules/services/dna-checker.service";
-import { Stats } from './modules/services/stats.service';
+import express from "express";
+import indexRouter from "./modules/core/routes/index.router";
+import { ConnectionDB } from "./modules/core/services/db/db.service";
+import mutantRouter from "./modules/dna-checker/routes/dna-checker.router";
+import statsRouter from "./modules/stats/routes/stats.router";
 
 const PORT = process.env.PORT || 3050;
 
@@ -13,26 +15,14 @@ app.listen(PORT, () => {
   console.log(`server started at http://localhost:${PORT}`);
 });
 
-// routes
-app.get("/health", (rq: Request, rs: Response) => {
-  rs.send("API OK!");
-});
-
-// Check if DNA Sequence belongs to a mutant
-app.post("/mutant", (rq: Request, rs: Response) => {
-  console.log("---mutant---");
-  // Leer secuencia de ADN desde el request
-  const dnaSequence = rq.body.dna;
-  const dnaChecker = new DNAChecker();
-  const isMutant = dnaChecker.isMutant(dnaSequence);
-
-  if (isMutant) {
-    rs.status(200).send("200-OK");
-  } else {
-    rs.status(403).send("403-Forbidden  ");
+app.use("/", indexRouter);
+app.use("/", mutantRouter);
+app.use("/", statsRouter);
+app.use(async (req: any, res: any, next: any): Promise<void> => {
+  try {
+    await ConnectionDB.getConnectionInstance();
+    return next();
+  } catch (e) {
+    return res.send(500, e.message);
   }
-});
-
-app.get("/stats", (rq: Request, rs: Response) => {
-  rs.send("Stats are: " + Stats.getStats());
 });

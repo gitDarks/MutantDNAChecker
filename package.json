@@ -46,6 +46,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "dotenv": "^10.0.0",
-    "mysql2": "^2.2.5"
+    "mysql2": "^2.2.5",
+    "typeorm": "^0.2.34"
   }
 }
