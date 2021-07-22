@@ -1,5 +1,5 @@
 import { ConnectionDB } from "../../core/services/db/db.service";
-import { StatsService } from "../services/db/stats.service";
+import { StatsService } from "../services/stats.service";
 
 export class Stats {
   private countMutantDna: number;
@@ -32,21 +32,20 @@ export class Stats {
     try {
       await ConnectionDB.getConnectionInstance();
 
-      this.countMutantDna = await this.statsService.countDNASequencesBySubject(
-        "M"
-      );
-      this.countHumanDna = await this.statsService.countDNASequencesBySubject(
-        "H"
-      );
-      await ConnectionDB.closeConnection();
+      this.countMutantDna =
+        (await this.statsService.countDNASequencesBySubject("M")) || 0;
+      this.countHumanDna =
+        (await this.statsService.countDNASequencesBySubject("H")) || 0;
 
       this.ratio =
         this.countMutantDna > 0
           ? this.countMutantDna /
             (this.countHumanDna > 0 ? this.countHumanDna : this.countMutantDna)
           : 0;
+
+      ConnectionDB.closeConnection();
     } catch (e) {
-      await ConnectionDB.closeConnection();
+      ConnectionDB.closeConnection();
       throw new Error(e);
     }
   }

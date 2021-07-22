@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Stats = void 0;
 const db_service_1 = require("../../core/services/db/db.service");
-const stats_service_1 = require("../services/db/stats.service");
+const stats_service_1 = require("../services/stats.service");
 class Stats {
     constructor() {
         this.statsService = new stats_service_1.StatsService();
@@ -35,17 +35,19 @@ class Stats {
             de lo contrario el ratio es la cantidad de mutantes/la cantidad de humanos */
             try {
                 yield db_service_1.ConnectionDB.getConnectionInstance();
-                this.countMutantDna = yield this.statsService.countDNASequencesBySubject("M");
-                this.countHumanDna = yield this.statsService.countDNASequencesBySubject("H");
-                yield db_service_1.ConnectionDB.closeConnection();
+                this.countMutantDna =
+                    (yield this.statsService.countDNASequencesBySubject("M")) || 0;
+                this.countHumanDna =
+                    (yield this.statsService.countDNASequencesBySubject("H")) || 0;
                 this.ratio =
                     this.countMutantDna > 0
                         ? this.countMutantDna /
                             (this.countHumanDna > 0 ? this.countHumanDna : this.countMutantDna)
                         : 0;
+                db_service_1.ConnectionDB.closeConnection();
             }
             catch (e) {
-                yield db_service_1.ConnectionDB.closeConnection();
+                db_service_1.ConnectionDB.closeConnection();
                 throw new Error(e);
             }
         });

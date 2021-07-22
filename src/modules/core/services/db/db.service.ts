@@ -1,12 +1,12 @@
 import "reflect-metadata";
-import { getVariable } from "../../../../modules/config";
+import { getVariable } from "../../../../config";
+import { DNASequencesEntity } from "../../entities/sequence.entity";
 import {
   Connection,
   createConnection,
   getConnectionManager,
   QueryRunner,
 } from "typeorm";
-import { DNASequencesEntity } from "../../entities/sequence.entity";
 
 export class ConnectionDB {
   public static async getConnectionInstance(): Promise<ConnectionDB> {
@@ -113,25 +113,25 @@ export class ConnectionDB {
   private static connectionInstance: ConnectionDB | null;
   private static connection: Connection;
   private static concurrentCalleds = 0;
-
   private static async runConnection(): Promise<Connection> {
     try {
-      console.log(`[DB NEW CONNECTION]`);
-      return await createConnection({
+
+      const rc = await createConnection({
         acquireTimeout: Number(await getVariable("DATABASE_TIMEOUT")),
         connectTimeout: Number(await getVariable("DATABASE_TIMEOUT")),
         database: await getVariable("DB_NAME"),
-        entities: [`${__dirname}/../../../**/*.entity{.ts,.js}`],
-        extra: {
-          connectionLimit: 300,
-        },
         host: await getVariable("DB_HOST"),
         password: await getVariable("DB_PASSWORD"),
         port: +(await getVariable("DB_PORT")),
+        username: await getVariable("DB_USER"),
+        entities: [DNASequencesEntity],
+        extra: {
+          connectionLimit: 300,
+        },
         synchronize: false,
         type: "mysql",
-        username: await getVariable("DB_USER"),
       });
+      return rc;
     } catch (error) {
       console.log(`[ERROR-DB] ${error}`);
       return Promise.reject({

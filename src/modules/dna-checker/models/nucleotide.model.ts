@@ -5,17 +5,13 @@
 */
 export class Nucleotide {
   private value: string;
-  private i: number;
-  private j: number;
   private right: boolean;
   private rightDown: boolean;
   private down: boolean;
   private leftDown: boolean;
 
-  constructor(value: string, i: number, j: number) {
+  constructor(value: string) {
     this.value = value;
-    this.i = i;
-    this.j = j;
     this.right = false;
     this.rightDown = false;
     this.down = false;

@@ -10,7 +10,6 @@ import { ConnectionDB } from "../../core/services/db/db.service";
 
 export class DNAChecker {
   dnaMatrixFull: Nucleotide[][] = [];
-  private dnaMatrix: string[][] = [];
   private sequenceCounter: number = 0;
   private context: SearchContext;
 
@@ -68,7 +67,7 @@ export class DNAChecker {
     const isMutantDNA = this.sequenceCounter >= 2 ? true : false;
 
     // almacenar en BD
-    this.saveDNASequence(dna.toString(), isMutantDNA ? "M" : "H");
+    // await this.saveDNASequence(dna.toString(), isMutantDNA ? "M" : "H");
 
     const endTime = new Date().valueOf();
     console.log("exec time: ", (endTime - initTime) / 1000);
@@ -83,13 +82,13 @@ export class DNAChecker {
       line = value.split("");
       const row: Nucleotide[] = new Array<Nucleotide>();
       line.forEach((nucleotide, i) => {
-        row.push(new Nucleotide(nucleotide, i, j));
+        row.push(new Nucleotide(nucleotide));
       });
       this.dnaMatrixFull.push(row);
     });
   }
 
-  private async saveDNASequence(dna: string, subjectType: string) {
+  public async saveDNASequence(dna: string, subjectType: string) {
     try {
       await ConnectionDB.getConnectionInstance();
       const dnaEntity = new DNASequencesEntity();
@@ -97,9 +96,10 @@ export class DNAChecker {
       dnaEntity.subjectType = subjectType;
 
       await this.dnaSequenceService.saveDNASequence(dnaEntity);
-      await ConnectionDB.closeConnection();
+      ConnectionDB.closeConnection();
     } catch (e) {
-      await ConnectionDB.closeConnection();
+      console.log("saveDNASequence Error: ", e);
+      ConnectionDB.closeConnection();
       throw new Error(e);
     }
   }

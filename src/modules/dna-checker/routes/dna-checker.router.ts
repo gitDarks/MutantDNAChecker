@@ -15,6 +15,11 @@ class MutantRouter {
         const dnaSequence = rq.body.dna;
         const dnaChecker = new DNAChecker();
         const isMutant = await dnaChecker.isMutant(dnaSequence);
+        // almacenar en BD
+        dnaChecker.saveDNASequence(
+          dnaSequence.toString(),
+          isMutant ? "M" : "H"
+        );
 
         if (isMutant) {
           rs.status(200).send("200-OK");

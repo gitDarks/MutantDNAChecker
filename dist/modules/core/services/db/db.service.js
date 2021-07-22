@@ -11,7 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConnectionDB = void 0;
 require("reflect-metadata");
-const config_1 = require("../../../../modules/config");
+const config_1 = require("../../../../config");
+const sequence_entity_1 = require("../../entities/sequence.entity");
 const typeorm_1 = require("typeorm");
 class ConnectionDB {
     static getConnectionInstance() {
@@ -108,22 +109,22 @@ class ConnectionDB {
     static runConnection() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(`[DB NEW CONNECTION]`);
-                return yield typeorm_1.createConnection({
+                const rc = yield typeorm_1.createConnection({
                     acquireTimeout: Number(yield config_1.getVariable("DATABASE_TIMEOUT")),
                     connectTimeout: Number(yield config_1.getVariable("DATABASE_TIMEOUT")),
                     database: yield config_1.getVariable("DB_NAME"),
-                    entities: [`${__dirname}/../../../**/*.entity{.ts,.js}`],
-                    extra: {
-                        connectionLimit: 300,
-                    },
                     host: yield config_1.getVariable("DB_HOST"),
                     password: yield config_1.getVariable("DB_PASSWORD"),
                     port: +(yield config_1.getVariable("DB_PORT")),
+                    username: yield config_1.getVariable("DB_USER"),
+                    entities: [sequence_entity_1.DNASequencesEntity],
+                    extra: {
+                        connectionLimit: 300,
+                    },
                     synchronize: false,
                     type: "mysql",
-                    username: yield config_1.getVariable("DB_USER"),
                 });
+                return rc;
             }
             catch (error) {
                 console.log(`[ERROR-DB] ${error}`);

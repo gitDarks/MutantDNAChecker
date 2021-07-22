@@ -26,7 +26,7 @@ __decorate([
     __metadata("design:type", String)
 ], DNASequencesEntity.prototype, "subjectType", void 0);
 DNASequencesEntity = __decorate([
-    typeorm_1.Entity("DNA_Sequences")
+    typeorm_1.Entity("SEQUENCES")
 ], DNASequencesEntity);
 exports.DNASequencesEntity = DNASequencesEntity;
 //# sourceMappingURL=sequence.entity.js.map

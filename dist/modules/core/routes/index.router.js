@@ -11,7 +11,7 @@ class IndexRouter {
         this.config();
     }
     config() {
-        this.router.get("/health", index_controller_1.default.Health);
+        this.router.get("/", index_controller_1.default.Health);
     }
 }
 const indexRouter = new IndexRouter();

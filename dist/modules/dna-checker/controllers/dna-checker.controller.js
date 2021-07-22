@@ -22,7 +22,6 @@ const db_service_1 = require("../../core/services/db/db.service");
 class DNAChecker {
     constructor() {
         this.dnaMatrixFull = [];
-        this.dnaMatrix = [];
         this.sequenceCounter = 0;
         this.dnaSequenceService = new dna_sequence_service_1.DnaSequenceService();
     }
@@ -68,7 +67,7 @@ class DNAChecker {
             Si se encontraron 2 o más secuencias se determina que el DNA es de un mutante*/
             const isMutantDNA = this.sequenceCounter >= 2 ? true : false;
             // almacenar en BD
-            this.saveDNASequence(dna.toString(), isMutantDNA ? "M" : "H");
+            // await this.saveDNASequence(dna.toString(), isMutantDNA ? "M" : "H");
             const endTime = new Date().valueOf();
             console.log("exec time: ", (endTime - initTime) / 1000);
             return isMutantDNA;
@@ -81,7 +80,7 @@ class DNAChecker {
             line = value.split("");
             const row = new Array();
             line.forEach((nucleotide, i) => {
-                row.push(new nucleotide_model_1.Nucleotide(nucleotide, i, j));
+                row.push(new nucleotide_model_1.Nucleotide(nucleotide));
             });
             this.dnaMatrixFull.push(row);
         });
@@ -94,10 +93,11 @@ class DNAChecker {
                 dnaEntity.sequence = dna;
                 dnaEntity.subjectType = subjectType;
                 yield this.dnaSequenceService.saveDNASequence(dnaEntity);
-                yield db_service_1.ConnectionDB.closeConnection();
+                db_service_1.ConnectionDB.closeConnection();
             }
             catch (e) {
-                yield db_service_1.ConnectionDB.closeConnection();
+                console.log("saveDNASequence Error: ", e);
+                db_service_1.ConnectionDB.closeConnection();
                 throw new Error(e);
             }
         });

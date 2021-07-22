@@ -9,7 +9,7 @@ class IndexRouter {
   }
 
   private config(): void {
-    this.router.get("/health", indexCoreController.Health);
+    this.router.get("/", indexCoreController.Health);
   }
 }
 

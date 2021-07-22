@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity("DNA_Sequences")
+@Entity("SEQUENCES")
 export class DNASequencesEntity {
   @PrimaryGeneratedColumn({ name: "ID", type: "int" })
   public id?: number;

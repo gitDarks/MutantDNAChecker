@@ -7,10 +7,8 @@ exports.Nucleotide = void 0;
     esto permite evitar realizar validaciones innecesarias o repetidas
 */
 class Nucleotide {
-    constructor(value, i, j) {
+    constructor(value) {
         this.value = value;
-        this.i = i;
-        this.j = j;
         this.right = false;
         this.rightDown = false;
         this.down = false;
