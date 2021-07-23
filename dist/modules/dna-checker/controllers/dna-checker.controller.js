@@ -29,49 +29,52 @@ class DNAChecker {
         const size = dna.length;
         const initTime = new Date().valueOf();
         // Mapeamos el array de entrada en un array 2D para hacer las busquedas en profundidad
-        this.mapDnaMatrix(dna);
-        console.log(this.dnaMatrixFull);
+        dNACheckerController.mapDnaMatrix(dna);
         // Verificar secuencia de ADN
-        this.context = new context_1.SearchContext(size);
+        dNACheckerController.context = new context_1.SearchContext(size);
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
                 /*Realizar comparación con los nucleotidos de la horizontal a la derecha usando la estrategia de
                 busqueda en profundidad, si encuentra una secuencia aumenta el contador de secuencias*/
-                this.context.setStrategy(new search_right_strategy_1.SearchRightStrategy());
-                this.sequenceCounter = this.context.search(i, j, this.dnaMatrixFull)
-                    ? this.sequenceCounter + 1
-                    : this.sequenceCounter;
+                dNACheckerController.context.setStrategy(new search_right_strategy_1.SearchRightStrategy());
+                dNACheckerController.sequenceCounter =
+                    dNACheckerController.context.search(i, j, dNACheckerController.dnaMatrixFull)
+                        ? dNACheckerController.sequenceCounter + 1
+                        : dNACheckerController.sequenceCounter;
                 /*Realizar comparación con los nucleotidos de la diagonal derecha hacia abajo usando la
                 estrategia de busqueda en profundidad, si encuentra una secuencia aumenta el contador de
                 secuencias*/
-                this.context.setStrategy(new search_rigth_down_strategy_1.SearchRightDownStrategy());
-                this.sequenceCounter = this.context.search(i, j, this.dnaMatrixFull)
-                    ? this.sequenceCounter + 1
-                    : this.sequenceCounter;
+                dNACheckerController.context.setStrategy(new search_rigth_down_strategy_1.SearchRightDownStrategy());
+                dNACheckerController.sequenceCounter =
+                    dNACheckerController.context.search(i, j, dNACheckerController.dnaMatrixFull)
+                        ? dNACheckerController.sequenceCounter + 1
+                        : dNACheckerController.sequenceCounter;
                 /*Realizar comparación con los nucleotidos de la vertical hacia abajo usando la estrategia de
                 busqueda en profundidad, si encuentra una secuencia aumenta el contador de secuencias*/
-                this.context.setStrategy(new search_down_strategy_1.SearchDownStrategy());
-                this.sequenceCounter = this.context.search(i, j, this.dnaMatrixFull)
-                    ? this.sequenceCounter + 1
-                    : this.sequenceCounter;
+                dNACheckerController.context.setStrategy(new search_down_strategy_1.SearchDownStrategy());
+                dNACheckerController.sequenceCounter =
+                    dNACheckerController.context.search(i, j, dNACheckerController.dnaMatrixFull)
+                        ? dNACheckerController.sequenceCounter + 1
+                        : dNACheckerController.sequenceCounter;
                 /*Realizar comparación con los nucleotidos de la diagonal izquierda hacia abajo usando la
                 estrategia de busqueda en profundidad, si encuentra una secuencia aumenta el contador de
                 secuencias*/
-                this.context.setStrategy(new search_left_down_strategy_1.SearchLeftDownStrategy());
-                this.sequenceCounter = this.context.search(i, j, this.dnaMatrixFull)
-                    ? this.sequenceCounter + 1
-                    : this.sequenceCounter;
+                dNACheckerController.context.setStrategy(new search_left_down_strategy_1.SearchLeftDownStrategy());
+                dNACheckerController.sequenceCounter =
+                    dNACheckerController.context.search(i, j, dNACheckerController.dnaMatrixFull)
+                        ? dNACheckerController.sequenceCounter + 1
+                        : dNACheckerController.sequenceCounter;
             }
         }
         /*no es necesario buscar en otras direcciones puesto que ya toda la matriz fue cubierta
         Si se encontraron 2 o más secuencias se determina que el DNA es de un mutante*/
-        const isMutantDNA = this.sequenceCounter >= 2 ? true : false;
+        const isMutantDNA = dNACheckerController.sequenceCounter >= 2 ? true : false;
         const endTime = new Date().valueOf();
         console.log("exec time: ", (endTime - initTime) / 1000);
         return isMutantDNA;
     }
     mapDnaMatrix(dna) {
-        this.dnaMatrixFull = new Array();
+        dNACheckerController.dnaMatrixFull = new Array();
         let line = [];
         dna.forEach((value, j) => {
             line = value.split("");
@@ -79,7 +82,7 @@ class DNAChecker {
             line.forEach((nucleotide, i) => {
                 row.push(new nucleotide_model_1.Nucleotide(nucleotide));
             });
-            this.dnaMatrixFull.push(row);
+            dNACheckerController.dnaMatrixFull.push(row);
         });
     }
     saveDNASequence(dna, subjectType) {
@@ -88,7 +91,7 @@ class DNAChecker {
                 const dnaEntity = new sequence_entity_1.DNASequencesEntity();
                 dnaEntity.sequence = dna;
                 dnaEntity.subjectType = subjectType;
-                const result = yield this.dnaSequenceService.saveDNASequence(dnaEntity);
+                const result = yield dNACheckerController.dnaSequenceService.saveDNASequence(dnaEntity);
                 yield db_service_1.ConnectionDB.closeConnection();
                 return result;
             }
@@ -98,6 +101,27 @@ class DNAChecker {
                 throw new Error(e);
             }
         });
+    }
+    checkisMutant(rq, rs) {
+        try {
+            // Leer secuencia de ADN desde el request
+            const request = rq.body;
+            const dnaSequence = request.dna;
+            const isMutant = dNACheckerController.isMutant(dnaSequence);
+            // almacenar en BD
+            dNACheckerController.saveDNASequence(dnaSequence.toString(), isMutant ? "M" : "H");
+            if (isMutant) {
+                rs.status(200).send("200-OK");
+            }
+            else {
+                rs.status(403).send("403-Forbidden");
+            }
+        }
+        catch (error) {
+            return rs
+                .status(500)
+                .send({ error: error.message || JSON.stringify(error) });
+        }
     }
 }
 exports.DNAChecker = DNAChecker;

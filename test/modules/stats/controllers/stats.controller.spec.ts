@@ -25,12 +25,15 @@ describe("Stats Controller Tests", () => {
     sinon.restore();
   });
 
-  const requestValidateDevice = httpMocks.createRequest({
+  const requestStats = httpMocks.createRequest({
     body: {},
     headers: {},
     method: "GET",
     url: "/stats",
   });
+
+  const response = httpMocks.createResponse();
+
   const queryRunnerMock = {
     commitTransaction: () => Promise.resolve(),
     release: () => Promise.resolve(),
@@ -40,7 +43,8 @@ describe("Stats Controller Tests", () => {
 
   describe("Get stats ratio from database", () => {
     it("should return 0.4", async () => {
-      const resultString = '"count_mutant_dna": 40, "count_human_dna": 100, "ratio": 0.4';
+      const resultString =
+        '"count_mutant_dna": 40, "count_human_dna": 100, "ratio": 0.4';
       const sequences: DNASequencesEntity[] = [];
       const fakeConnection = sinon.createStubInstance(typeorm.Connection);
       const fakeRepository = sinon.createStubInstance(typeorm.EntityManager);
@@ -60,10 +64,12 @@ describe("Stats Controller Tests", () => {
       sandbox.stub(typeorm, "createConnection").returns(fakeConnection as any);
       await ConnectionDB.getConnectionInstance();
 
-      const stats = await statsController.getStats();
+      await statsController.getStats(requestStats, response);
 
       await ConnectionDB.closeConnection();
-      expect(stats).to.equal(resultString);
+      
+      expect(response.statusCode).to.be.equal(200);
+      expect(response._getData()).to.have.string(resultString);
     });
   });
 });

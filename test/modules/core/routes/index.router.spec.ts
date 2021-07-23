@@ -38,14 +38,4 @@ describe.skip("GET /", () => {
         done();
       });
   });
-
-  it("should fail on non-existent route", (done) => {
-    chai
-      .request(app)
-      .get("/mypage")
-      .end((err, res) => {
-        res.should.have.status(404);
-        done();
-      });
-  });
 });

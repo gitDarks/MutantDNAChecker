@@ -30,16 +30,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/8</span>
+                <span class='fraction'>4/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
@@ -108,22 +108,16 @@
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
 <a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -132,6 +126,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -142,9 +137,23 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -158,66 +167,75 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import { ConnectionDB } from "../../core/services/db/db.service";
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { ConnectionDB } from "../../core/services/db/db.service";
 import { StatsService } from "../services/stats.service";
+import { Request, Response } from "express";
 &nbsp;
 export class Stats {
   private countMutantDna: number;
   private countHumanDna: number;
   private ratio: number;
 &nbsp;
-  private readonly statsService: StatsService;
+  public statsService: StatsService;
 &nbsp;
   constructor() {
     this.statsService = new StatsService();
   }
 &nbsp;
-  public async getStats(): Promise&lt;string&gt; {
-    await this.calcRatio();
-    return (
-      '"count_mutant_dna": ' +
-      this.countMutantDna +
-      ', "count_human_dna": ' +
-      this.countHumanDna +
-      ', "ratio": ' +
-      this.ratio
-    );
-  }
-&nbsp;
-  private async calcRatio() {
+  public async getStats(rq: Request, rs: Response) {
     /* Contar los registros en base de datos de las secuencias de ADN de mutantes y humanos
     Si la cantidad de mutantes es cero, el ratio es cero
     Si la cantidad de humanos es cero, el ratio es 1 o la cantidad de mutantes / la cantidad de mutantes
     de lo contrario el ratio es la cantidad de mutantes/la cantidad de humanos */
     try {
-      this.countMutantDna =
-        (await this.statsService.countDNASequencesBySubject("M")) || <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
-      this.countHumanDna =
-        (await this.statsService.countDNASequencesBySubject("H")) || <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
-      this.ratio =
-        this.countMutantDna &gt; 0
-          ? this.countMutantDna /
-            (this.countHumanDna &gt; 0 ? this.countHumanDna : <span class="branch-1 cbranch-no" title="branch not covered" >this.countMutantDna)</span>
+      statsController.countMutantDna =
+        (await statsController.statsService.countDNASequencesBySubject("M")) ||
+<span class="branch-1 cbranch-no" title="branch not covered" >        0;</span>
+      statsController.countHumanDna =
+        (await statsController.statsService.countDNASequencesBySubject("H")) ||
+<span class="branch-1 cbranch-no" title="branch not covered" >        0;</span>
+      statsController.ratio =
+        statsController.countMutantDna &gt; 0
+          ? statsController.countMutantDna /
+            (statsController.countHumanDna &gt; 0
+              ? statsController.countHumanDna
+              : <span class="branch-1 cbranch-no" title="branch not covered" >statsController.countMutantDna)</span>
           : <span class="branch-1 cbranch-no" title="branch not covered" >0;</span>
 &nbsp;
       await ConnectionDB.closeConnection();
-    } catch (e) {
+&nbsp;
+      const result =
+        '"count_mutant_dna": ' +
+        statsController.countMutantDna +
+        ', "count_human_dna": ' +
+        statsController.countHumanDna +
+        ', "ratio": ' +
+        statsController.ratio;
+&nbsp;
+      return rs.status(200).send("Stats are: " + result);
+    } catch (error) {
 <span class="cstat-no" title="statement not covered" >      await ConnectionDB.closeConnection();</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error(e);</span>
+<span class="cstat-no" title="statement not covered" >      return rs</span>
+        .status(500)
+        .send({ error: error.message || JSON.stringify(error) });
     }
   }
 }
 &nbsp;
 const statsController = new Stats();
-export default statsController;</pre></td></tr></table></pre>
+export default statsController;
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Thu Jul 22 2021 20:39:00 GMT-0500 (Colombia Standard Time)
+                at Thu Jul 22 2021 22:42:10 GMT-0500 (Colombia Standard Time)
             </div>
         </div>
         <script src="../../../../prettify.js"></script>

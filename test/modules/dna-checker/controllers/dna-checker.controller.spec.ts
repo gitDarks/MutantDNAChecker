@@ -3,7 +3,6 @@ import chaiHttp from "chai-http";
 import httpMocks from "node-mocks-http";
 import sinon from "sinon";
 import * as typeorm from "typeorm";
-import { DNASequencesEntity } from "../../../../src/modules/core/entities/sequence.entity";
 import { ConnectionDB } from "../../../../src/modules/core/services/db/db.service";
 import dNACheckerController from "../../../../src/modules/dna-checker/controllers/dna-checker.controller";
 
@@ -24,13 +23,25 @@ describe("DNA Checker Controller Tests", () => {
     sinon.restore();
   });
 
-  const dna = ["ATGCGA", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA", "TCACTG"];
-  const requestValidateDevice = httpMocks.createRequest({
-    body: { dna: dna },
+  const mutanDNA = ["ATGCGA", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA", "TCACTG"];
+  const humanDNA = ["ATGCGA", "CAGTGC", "TTATTT", "AGACGG", "GCGTCA", "TCACTG"];
+
+  const requestMutantDNAChecker = httpMocks.createRequest({
+    body: { dna: mutanDNA },
     headers: {},
-    method: "GET",
+    method: "POST",
     url: "/mutant",
   });
+
+  const requestHumanDNAChecker = httpMocks.createRequest({
+    body: { dna: humanDNA },
+    headers: {},
+    method: "POST",
+    url: "/mutant",
+  });
+
+  const response = httpMocks.createResponse();
+
   const queryRunnerMock = {
     commitTransaction: () => Promise.resolve(),
     release: () => Promise.resolve(),
@@ -39,24 +50,15 @@ describe("DNA Checker Controller Tests", () => {
   } as any;
 
   describe("Check if DNA sequence belongs to a mutant", () => {
-    it("should return true when DNA is from mutant", () => {
-      const isMutant = dNACheckerController.isMutant(dna);
-      expect(isMutant).to.be.equal(true);
-    });
-
-    it("should save DNA Sequence", async () => {
-      const returnEntity = new DNASequencesEntity();
-      returnEntity.sequence = dna.toString();
-      returnEntity.subjectType = "M";
-
+    it("should return 200 when DNA is from mutant", async () => {
       const fakeConnection = sinon.createStubInstance(typeorm.Connection);
       const fakeRepository = sinon.createStubInstance(typeorm.EntityManager);
 
-      fakeRepository.findOne
-        .onFirstCall()
-        .returns(Promise.resolve(returnEntity));
+      fakeRepository.findOne.onFirstCall().returns(Promise.resolve({}));
 
-      fakeRepository.save.returns(Promise.resolve(returnEntity));
+      fakeRepository.save.returns(
+        Promise.resolve(requestMutantDNAChecker.toString)
+      );
       fakeRepository.delete.returns(Promise.resolve({ raw: 0, affected: 1 }));
 
       fakeConnection.createQueryRunner.returns({
@@ -67,14 +69,9 @@ describe("DNA Checker Controller Tests", () => {
       fakeConnection.close.returnsThis();
       sandbox.stub(typeorm, "createConnection").returns(fakeConnection as any);
       await ConnectionDB.getConnectionInstance();
-
-      const result = await dNACheckerController.saveDNASequence(
-        dna.toString(),
-        "M"
-      );
-
+      dNACheckerController.checkisMutant(requestMutantDNAChecker, response);
       await ConnectionDB.closeConnection();
-      expect(result.sequence).to.equal(dna.toString());
+      expect(response.statusCode).to.be.equal(200);
     });
   });
 });

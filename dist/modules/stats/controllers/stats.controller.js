@@ -16,41 +16,45 @@ class Stats {
     constructor() {
         this.statsService = new stats_service_1.StatsService();
     }
-    getStats() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.calcRatio();
-            return ('"count_mutant_dna": ' +
-                this.countMutantDna +
-                ', "count_human_dna": ' +
-                this.countHumanDna +
-                ', "ratio": ' +
-                this.ratio);
-        });
-    }
-    calcRatio() {
+    getStats(rq, rs) {
         return __awaiter(this, void 0, void 0, function* () {
             /* Contar los registros en base de datos de las secuencias de ADN de mutantes y humanos
             Si la cantidad de mutantes es cero, el ratio es cero
             Si la cantidad de humanos es cero, el ratio es 1 o la cantidad de mutantes / la cantidad de mutantes
             de lo contrario el ratio es la cantidad de mutantes/la cantidad de humanos */
             try {
-                this.countMutantDna =
-                    (yield this.statsService.countDNASequencesBySubject("M")) || 0;
-                this.countHumanDna =
-                    (yield this.statsService.countDNASequencesBySubject("H")) || 0;
-                this.ratio =
-                    this.countMutantDna > 0
-                        ? this.countMutantDna /
-                            (this.countHumanDna > 0 ? this.countHumanDna : this.countMutantDna)
+                statsController.countMutantDna =
+                    (yield statsController.statsService.countDNASequencesBySubject("M")) ||
+                        0;
+                statsController.countHumanDna =
+                    (yield statsController.statsService.countDNASequencesBySubject("H")) ||
+                        0;
+                statsController.ratio =
+                    statsController.countMutantDna > 0
+                        ? statsController.countMutantDna /
+                            (statsController.countHumanDna > 0
+                                ? statsController.countHumanDna
+                                : statsController.countMutantDna)
                         : 0;
                 yield db_service_1.ConnectionDB.closeConnection();
+                const result = '"count_mutant_dna": ' +
+                    statsController.countMutantDna +
+                    ', "count_human_dna": ' +
+                    statsController.countHumanDna +
+                    ', "ratio": ' +
+                    statsController.ratio;
+                return rs.status(200).send("Stats are: " + result);
             }
-            catch (e) {
+            catch (error) {
                 yield db_service_1.ConnectionDB.closeConnection();
-                throw new Error(e);
+                return rs
+                    .status(500)
+                    .send({ error: error.message || JSON.stringify(error) });
             }
         });
     }
 }
 exports.Stats = Stats;
+const statsController = new Stats();
+exports.default = statsController;
 //# sourceMappingURL=stats.controller.js.map

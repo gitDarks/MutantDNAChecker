@@ -6,7 +6,6 @@ import * as configService from '../src/config';
 
 describe('Config', () => {
     beforeEach(() => {
-        //process.env.NODE_ENV = 'stage';
         AWSMock.setSDKInstance(AWS);
     });
 

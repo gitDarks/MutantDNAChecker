@@ -1,5 +1,5 @@
-import { Request, Response, Router } from "express";
-import { Stats } from "../controllers/stats.controller";
+import { Router } from "express";
+import statsController from "../controllers/stats.controller";
 
 class StatsRouter {
   public router: Router = Router();
@@ -10,10 +10,7 @@ class StatsRouter {
 
   private config(): void {
     try {
-      this.router.get("/stats", async (rq: Request, rs: Response) => {
-        const stats = new Stats();
-        rs.send("Stats are: " + await stats.getStats());
-      });
+      this.router.get("/stats", statsController.getStats);
     } catch (error) {
       console.log(error);
     }

@@ -17,4 +17,6 @@ class SearchContext {
     }
 }
 exports.SearchContext = SearchContext;
+const searchContext = new SearchContext(0);
+exports.default = searchContext;
 //# sourceMappingURL=context.js.map
