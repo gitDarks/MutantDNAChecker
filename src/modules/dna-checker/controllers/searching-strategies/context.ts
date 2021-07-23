@@ -22,3 +22,6 @@ export class SearchContext {
     return result;
   }
 }
+
+const searchContext = new SearchContext(0);
+export default searchContext;

@@ -25,4 +25,6 @@ class SearchDownStrategy {
     }
 }
 exports.SearchDownStrategy = SearchDownStrategy;
+const searchDownStrategy = new SearchDownStrategy();
+exports.default = searchDownStrategy;
 //# sourceMappingURL=search-down-strategy.js.map

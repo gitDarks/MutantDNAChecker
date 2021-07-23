@@ -25,4 +25,6 @@ class SearchRightStrategy {
     }
 }
 exports.SearchRightStrategy = SearchRightStrategy;
+const searchRightStrategy = new SearchRightStrategy();
+exports.default = searchRightStrategy;
 //# sourceMappingURL=search-right-strategy.js.map

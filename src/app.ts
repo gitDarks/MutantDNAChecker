@@ -16,19 +16,20 @@ if (!isInLambda) {
     console.log(`server started at http://localhost:${PORT}`);
   });
 }
-
+app.use(async (req: any, res: any, next: any): Promise<void> => {
+  try {
+    console.log("app.ts - getConnectionInstance");
+    await ConnectionDB.getConnectionInstance();
+    return next();
+  } catch (e) {
+    return res.send(500, e.message);
+  }
+});
 app.use("/", indexRouter);
 app.use("/", mutantRouter);
 app.use("/", statsRouter);
 
-// app.use(async (req: any, res: any, next: any): Promise<void> => {
-//   try {
-//     await ConnectionDB.getConnectionInstance();
-//     return next();
-//   } catch (e) {
-//     return res.send(500, e.message);
-//   }
-// });
+
 
 app.use((err: any, req: any, res: any, next: any) => {
   const statusCode = err.statusCode;

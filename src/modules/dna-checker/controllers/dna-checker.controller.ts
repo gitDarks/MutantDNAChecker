@@ -9,7 +9,7 @@ import { DnaSequenceService } from "../services/dna_sequence.service";
 import { ConnectionDB } from "../../core/services/db/db.service";
 
 export class DNAChecker {
-  dnaMatrixFull: Nucleotide[][] = [];
+  private dnaMatrixFull: Nucleotide[][] = [];
   private sequenceCounter: number = 0;
   private context: SearchContext;
 
@@ -19,12 +19,13 @@ export class DNAChecker {
     this.dnaSequenceService = new DnaSequenceService();
   }
 
-  public async isMutant(dna: string[]): Promise<boolean> {
+  public isMutant(dna: string[]): boolean {
     const size = dna.length;
     const initTime = new Date().valueOf();
 
     // Mapeamos el array de entrada en un array 2D para hacer las busquedas en profundidad
     this.mapDnaMatrix(dna);
+    console.log(this.dnaMatrixFull);
 
     // Verificar secuencia de ADN
     this.context = new SearchContext(size);
@@ -66,9 +67,6 @@ export class DNAChecker {
     Si se encontraron 2 o más secuencias se determina que el DNA es de un mutante*/
     const isMutantDNA = this.sequenceCounter >= 2 ? true : false;
 
-    // almacenar en BD
-    // await this.saveDNASequence(dna.toString(), isMutantDNA ? "M" : "H");
-
     const endTime = new Date().valueOf();
     console.log("exec time: ", (endTime - initTime) / 1000);
     return isMutantDNA;
@@ -88,19 +86,23 @@ export class DNAChecker {
     });
   }
 
-  public async saveDNASequence(dna: string, subjectType: string) {
+  public async saveDNASequence(dna: string, subjectType: string):Promise<DNASequencesEntity> {
     try {
-      await ConnectionDB.getConnectionInstance();
       const dnaEntity = new DNASequencesEntity();
       dnaEntity.sequence = dna;
       dnaEntity.subjectType = subjectType;
 
-      await this.dnaSequenceService.saveDNASequence(dnaEntity);
-      ConnectionDB.closeConnection();
+      const result = await this.dnaSequenceService.saveDNASequence(dnaEntity);
+
+      await ConnectionDB.closeConnection();
+      return result;
     } catch (e) {
       console.log("saveDNASequence Error: ", e);
-      ConnectionDB.closeConnection();
+      await ConnectionDB.closeConnection();
       throw new Error(e);
     }
   }
 }
+
+const dNACheckerController = new DNAChecker();
+export default dNACheckerController;

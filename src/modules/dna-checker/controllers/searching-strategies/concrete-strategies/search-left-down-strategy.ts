@@ -24,7 +24,7 @@ export class SearchLeftDownStrategy implements ISearchStrategy {
       this.dnaMatrix[i + 1][j - 1].getValue()
     ) {
       this.matchCounter++;
-      this.dnaMatrix[i][j + 1].setLeftDown(true);
+      this.dnaMatrix[i][j - 1].setLeftDown(true);
 
       return this.matchCounter === 4 ? true : this.check(i + 1, j - 1);
     }
@@ -33,3 +33,6 @@ export class SearchLeftDownStrategy implements ISearchStrategy {
     return false;
   }
 }
+
+const searchLeftDown = new SearchLeftDownStrategy();
+export default searchLeftDown;

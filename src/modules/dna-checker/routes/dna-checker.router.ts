@@ -24,7 +24,7 @@ class MutantRouter {
         if (isMutant) {
           rs.status(200).send("200-OK");
         } else {
-          rs.status(403).send("403-Forbidden  ");
+          rs.status(403).send("403-Forbidden");
         }
       });
     } catch (error) {

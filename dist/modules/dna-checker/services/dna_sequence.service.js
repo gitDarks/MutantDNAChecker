@@ -18,7 +18,6 @@ class DnaSequenceService {
             const queryRunner = yield db_service_1.ConnectionDB.getQueryRunner();
             try {
                 yield db_service_1.ConnectionDB.startTransaction(queryRunner);
-                console.log("[INFO] queryRunner.manager.save %o", dnaSequence);
                 const dnaSequenceSaved = yield queryRunner.manager.save(sequence_entity_1.DNASequencesEntity, dnaSequence);
                 yield db_service_1.ConnectionDB.commitTransaction(queryRunner);
                 return dnaSequenceSaved;

@@ -32,3 +32,6 @@ export class SearchDownStrategy implements ISearchStrategy {
     return false;
   }
 }
+
+const searchDownStrategy = new SearchDownStrategy();
+export default searchDownStrategy;

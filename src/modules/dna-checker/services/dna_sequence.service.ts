@@ -8,7 +8,6 @@ export class DnaSequenceService {
     const queryRunner = await ConnectionDB.getQueryRunner();
     try {
       await ConnectionDB.startTransaction(queryRunner);
-      console.log("[INFO] queryRunner.manager.save %o", dnaSequence);
       const dnaSequenceSaved = await queryRunner.manager.save(
         DNASequencesEntity,
         dnaSequence

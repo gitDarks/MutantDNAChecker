@@ -26,4 +26,6 @@ class SearchRightDownStrategy {
     }
 }
 exports.SearchRightDownStrategy = SearchRightDownStrategy;
+const searchRightDown = new SearchRightDownStrategy();
+exports.default = searchRightDown;
 //# sourceMappingURL=search-rigth-down-strategy.js.map

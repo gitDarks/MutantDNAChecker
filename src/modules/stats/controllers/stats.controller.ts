@@ -30,23 +30,23 @@ export class Stats {
     Si la cantidad de humanos es cero, el ratio es 1 o la cantidad de mutantes / la cantidad de mutantes
     de lo contrario el ratio es la cantidad de mutantes/la cantidad de humanos */
     try {
-      await ConnectionDB.getConnectionInstance();
-
       this.countMutantDna =
         (await this.statsService.countDNASequencesBySubject("M")) || 0;
       this.countHumanDna =
         (await this.statsService.countDNASequencesBySubject("H")) || 0;
-
       this.ratio =
         this.countMutantDna > 0
           ? this.countMutantDna /
             (this.countHumanDna > 0 ? this.countHumanDna : this.countMutantDna)
           : 0;
 
-      ConnectionDB.closeConnection();
+      await ConnectionDB.closeConnection();
     } catch (e) {
-      ConnectionDB.closeConnection();
+      await ConnectionDB.closeConnection();
       throw new Error(e);
     }
   }
 }
+
+const statsController = new Stats();
+export default statsController;
