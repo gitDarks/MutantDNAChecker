@@ -28,8 +28,6 @@ class DNAChecker {
     isMutant(dna) {
         const size = dna.length;
         const initTime = new Date().valueOf();
-        // Mapeamos el array de entrada en un array 2D para hacer las busquedas en profundidad
-        dNACheckerController.mapDnaMatrix(dna);
         // Verificar secuencia de ADN
         dNACheckerController.context = new context_1.SearchContext(size);
         for (let i = 0; i < size; i++) {
@@ -76,14 +74,36 @@ class DNAChecker {
     mapDnaMatrix(dna) {
         dNACheckerController.dnaMatrixFull = new Array();
         let line = [];
-        dna.forEach((value, j) => {
-            line = value.split("");
-            const row = new Array();
-            line.forEach((nucleotide, i) => {
-                row.push(new nucleotide_model_1.Nucleotide(nucleotide));
-            });
-            dNACheckerController.dnaMatrixFull.push(row);
-        });
+        let val = true;
+        // Dado que la longitud máxima permitida en la BD es de 400, solo se puede tener una secuencia de 14X14
+        if (dna && dna.length > 4 && dna.length <= 14) {
+            for (const value of dna) {
+                line = value.split("");
+                // Verificar que la secuencia de ADN sea de NXN
+                if (dna.length === value.length) {
+                    const row = new Array();
+                    for (const nucleotide of line) {
+                        // verificar que el nucleótido sea válido
+                        if (["A", "C", "G", "T"].includes(nucleotide)) {
+                            row.push(new nucleotide_model_1.Nucleotide(nucleotide));
+                        }
+                        else {
+                            val = false;
+                            break;
+                        }
+                    }
+                    dNACheckerController.dnaMatrixFull.push(row);
+                }
+                else {
+                    val = false;
+                    break;
+                }
+            }
+        }
+        else {
+            val = false;
+        }
+        return val;
     }
     saveDNASequence(dna, subjectType) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -107,14 +127,22 @@ class DNAChecker {
             // Leer secuencia de ADN desde el request
             const request = rq.body;
             const dnaSequence = request.dna;
-            const isMutant = dNACheckerController.isMutant(dnaSequence);
-            // almacenar en BD
-            dNACheckerController.saveDNASequence(dnaSequence.toString(), isMutant ? "M" : "H");
-            if (isMutant) {
-                rs.status(200).send("200-OK");
+            // Validamos el request y mapeamos el array de entrada en un array 2D para hacer las busquedas en profundidad
+            const isValidRequest = dNACheckerController.mapDnaMatrix(dnaSequence);
+            if (isValidRequest) {
+                // Verificar si el ADN es mutante
+                const isMutant = dNACheckerController.isMutant(dnaSequence);
+                // almacenar en BD
+                dNACheckerController.saveDNASequence(dnaSequence.toString(), isMutant ? "M" : "H");
+                if (isMutant) {
+                    rs.status(200).send("200-OK");
+                }
+                else {
+                    rs.status(403).send("403-Forbidden");
+                }
             }
             else {
-                rs.status(403).send("403-Forbidden");
+                rs.status(400).send("400-Bad request");
             }
         }
         catch (error) {

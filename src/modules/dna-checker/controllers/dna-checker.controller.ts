@@ -9,6 +9,7 @@ import { DnaSequenceService } from "../services/dna_sequence.service";
 import { ConnectionDB } from "../../core/services/db/db.service";
 import { IMutantDNARequestModel } from "../models/request.model";
 import { Request, Response } from "express";
+import { json } from "body-parser";
 
 export class DNAChecker {
   private dnaMatrixFull: Nucleotide[][] = [];
@@ -24,9 +25,6 @@ export class DNAChecker {
   private isMutant(dna: string[]): boolean {
     const size = dna.length;
     const initTime = new Date().valueOf();
-
-    // Mapeamos el array de entrada en un array 2D para hacer las busquedas en profundidad
-    dNACheckerController.mapDnaMatrix(dna);
 
     // Verificar secuencia de ADN
     dNACheckerController.context = new SearchContext(size);
@@ -94,18 +92,38 @@ export class DNAChecker {
     return isMutantDNA;
   }
 
-  private mapDnaMatrix(dna: string[]) {
+  private mapDnaMatrix(dna: string[]): boolean {
     dNACheckerController.dnaMatrixFull = new Array<Nucleotide[]>();
     let line: string[] = [];
+    let val: boolean = true;
 
-    dna.forEach((value: string, j: number) => {
-      line = value.split("");
-      const row: Nucleotide[] = new Array<Nucleotide>();
-      line.forEach((nucleotide, i) => {
-        row.push(new Nucleotide(nucleotide));
-      });
-      dNACheckerController.dnaMatrixFull.push(row);
-    });
+    // Dado que la longitud máxima permitida en la BD es de 400, solo se puede tener una secuencia de 14X14
+    if (dna && dna.length > 4 && dna.length <= 14) {
+      for (const value of dna) {
+        line = value.split("");
+        // Verificar que la secuencia de ADN sea de NXN
+        if (dna.length === value.length) {
+          const row: Nucleotide[] = new Array<Nucleotide>();
+          for (const nucleotide of line) {
+            // verificar que el nucleótido sea válido
+            if (["A", "C", "G", "T"].includes(nucleotide)) {
+              row.push(new Nucleotide(nucleotide));
+            } else {
+              val = false;
+              break;
+            }
+          }
+          dNACheckerController.dnaMatrixFull.push(row);
+        } else {
+          val = false;
+          break;
+        }
+      }
+    } else {
+      val = false;
+    }
+
+    return val;
   }
 
   private async saveDNASequence(
@@ -136,17 +154,25 @@ export class DNAChecker {
       // Leer secuencia de ADN desde el request
       const request = rq.body as IMutantDNARequestModel;
       const dnaSequence = request.dna;
-      const isMutant = dNACheckerController.isMutant(dnaSequence);
-      // almacenar en BD
-      dNACheckerController.saveDNASequence(
-        dnaSequence.toString(),
-        isMutant ? "M" : "H"
-      );
 
-      if (isMutant) {
-        rs.status(200).send("200-OK");
+      // Validamos el request y mapeamos el array de entrada en un array 2D para hacer las busquedas en profundidad
+      const isValidRequest = dNACheckerController.mapDnaMatrix(dnaSequence);
+      if (isValidRequest) {
+        // Verificar si el ADN es mutante
+        const isMutant = dNACheckerController.isMutant(dnaSequence);
+        // almacenar en BD
+        dNACheckerController.saveDNASequence(
+          dnaSequence.toString(),
+          isMutant ? "M" : "H"
+        );
+
+        if (isMutant) {
+          rs.status(200).send("200-OK");
+        } else {
+          rs.status(403).send("403-Forbidden");
+        }
       } else {
-        rs.status(403).send("403-Forbidden");
+        rs.status(400).send("400-Bad request");
       }
     } catch (error) {
       return rs

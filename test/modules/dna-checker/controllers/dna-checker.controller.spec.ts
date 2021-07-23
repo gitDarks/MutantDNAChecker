@@ -24,7 +24,7 @@ describe("DNA Checker Controller Tests", () => {
   });
 
   const mutanDNA = ["ATGCGA", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA", "TCACTG"];
-  const humanDNA = ["ATGCGA", "CAGTGC", "TTATTT", "AGACGG", "GCGTCA", "TCACTG"];
+  const badDNA = ["ATGCGX", " AGTGC", "TT1TTT", "aGACGG", "GCTCA", "TCA TG"];
 
   const requestMutantDNAChecker = httpMocks.createRequest({
     body: { dna: mutanDNA },
@@ -33,8 +33,8 @@ describe("DNA Checker Controller Tests", () => {
     url: "/mutant",
   });
 
-  const requestHumanDNAChecker = httpMocks.createRequest({
-    body: { dna: humanDNA },
+  const badRequestChecker = httpMocks.createRequest({
+    body: { dna: badDNA },
     headers: {},
     method: "POST",
     url: "/mutant",
@@ -72,6 +72,36 @@ describe("DNA Checker Controller Tests", () => {
       dNACheckerController.checkisMutant(requestMutantDNAChecker, response);
       await ConnectionDB.closeConnection();
       expect(response.statusCode).to.be.equal(200);
+    });
+
+    it("should return 400 bad request", () => {
+      dNACheckerController.checkisMutant(badRequestChecker, response);
+      expect(response.statusCode).to.be.equal(400);
+    });    
+
+    it("should return 500 when error occurs", async () => {
+      const fakeConnection = sinon.createStubInstance(typeorm.Connection);
+      const fakeRepository = sinon.createStubInstance(typeorm.EntityManager);
+
+      fakeRepository.findOne.throws("ERROR");
+
+      fakeConnection.createQueryRunner.returns({
+        commitTransaction: () => Promise.resolve(),
+        manager: fakeRepository as any,
+        release: () => Promise.resolve(),
+        rollbackTransaction: () => Promise.resolve(),
+        startTransaction: () => Promise.resolve(),
+      } as any);
+
+      fakeConnection.close.returnsThis();
+      sandbox.stub(typeorm, "createConnection").returns(fakeConnection as any);
+      try {
+        await ConnectionDB.getConnectionInstance();
+        dNACheckerController.checkisMutant(requestMutantDNAChecker, response);
+      } catch (e) {
+        await ConnectionDB.closeConnection();
+        expect(response.statusCode).to.be.equal(500);
+      }
     });
   });
 });

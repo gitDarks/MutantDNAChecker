@@ -67,9 +67,34 @@ describe("Stats Controller Tests", () => {
       await statsController.getStats(requestStats, response);
 
       await ConnectionDB.closeConnection();
-      
+
       expect(response.statusCode).to.be.equal(200);
       expect(response._getData()).to.have.string(resultString);
+    });
+
+    it("should return 500 when error occurs", async () => {
+      const fakeConnection = sinon.createStubInstance(typeorm.Connection);
+      const fakeRepository = sinon.createStubInstance(typeorm.EntityManager);
+
+      fakeRepository.findOne.throws("ERROR");
+
+      fakeConnection.createQueryRunner.returns({
+        commitTransaction: () => Promise.resolve(),
+        manager: fakeRepository as any,
+        release: () => Promise.resolve(),
+        rollbackTransaction: () => Promise.resolve(),
+        startTransaction: () => Promise.resolve(),
+      } as any);
+
+      fakeConnection.close.returnsThis();
+      sandbox.stub(typeorm, "createConnection").returns(fakeConnection as any);
+      try {
+        await ConnectionDB.getConnectionInstance();
+        await statsController.getStats(requestStats, response);
+      } catch (e) {
+        await ConnectionDB.closeConnection();
+        expect(response.statusCode).to.be.equal(500);
+      }
     });
   });
 });
